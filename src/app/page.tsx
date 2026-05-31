@@ -109,8 +109,8 @@ export default function Home() {
           </div>
         </header>
 
-        <section className="grid gap-4 lg:grid-cols-[280px_minmax(680px,1fr)_300px]">
-          <aside className="rounded-lg border border-slate-300 bg-white p-4">
+        <section className="grid gap-4 lg:grid-cols-[260px_minmax(0,1fr)_280px] 2xl:grid-cols-[280px_minmax(0,1fr)_300px]">
+          <aside className="min-w-0 rounded-lg border border-slate-300 bg-white p-4">
             <h2 className="mb-4 flex items-center gap-2 text-base font-semibold">
               <CalendarDays size={18} aria-hidden="true" /> Month Setup
             </h2>
@@ -183,7 +183,7 @@ export default function Home() {
             </div>
           </aside>
 
-          <section className="rounded-lg border border-slate-300 bg-white p-4">
+          <section className="min-w-0 rounded-lg border border-slate-300 bg-white p-4">
             <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -205,7 +205,7 @@ export default function Home() {
             </div>
 
             <div className="overflow-x-auto rounded-lg border border-slate-300">
-              <table className="w-full min-w-[1040px] border-collapse text-sm">
+              <table className="w-full min-w-[960px] border-collapse text-sm">
                 <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
                   <tr>
                     <th className="p-2">Date</th>
@@ -266,7 +266,7 @@ export default function Home() {
             </div>
           </section>
 
-          <aside className="rounded-lg border border-slate-300 bg-white p-4">
+          <aside className="min-w-0 rounded-lg border border-slate-300 bg-white p-4">
             <h2 className="mb-4 flex items-center gap-2 text-base font-semibold">
               <DollarSign size={18} aria-hidden="true" /> Live Salary Result
             </h2>
