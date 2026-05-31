@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarDays, Clock, DollarSign, Filter, ListRestart } from "lucide-react";
+import { CalendarDays, Clock, DollarSign, Filter, ListRestart, Printer } from "lucide-react";
 import { type KeyboardEvent, useMemo, useState } from "react";
 import { calculateDay, calculatePayroll, defaultSettings } from "@/lib/payroll/calculate";
 import { formatHours, formatMoney } from "@/lib/payroll/format";
@@ -122,15 +122,19 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-5 text-slate-950 md:px-6">
-      <div className="mx-auto max-w-[1540px]">
+      <div className="screen-app mx-auto max-w-[1540px]" data-testid="screen-app">
         <header className="mb-4 flex flex-col gap-3 border-b border-slate-300 pb-4 md:flex-row md:items-end md:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-normal">HR Payroll Calculator</h1>
             <p className="mt-1 text-sm text-slate-600">One-time Johor payroll calculator for monthly salary, OT, PH, and allowance.</p>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs text-slate-600">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
             <span className="rounded-full border border-slate-300 bg-white px-3 py-2">Malaysia + Johor PH</span>
             <span className="rounded-full border border-slate-300 bg-white px-3 py-2">No login or database</span>
+            <button aria-label="Print report" className="inline-flex h-9 items-center gap-2 rounded-md border border-slate-900 bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-700" type="button" onClick={() => window.print()}>
+              <Printer size={16} aria-hidden="true" />
+              Print
+            </button>
           </div>
         </header>
 
@@ -369,6 +373,85 @@ export default function Home() {
           </aside>
         </section>
       </div>
+
+      <section className="print-report" data-testid="print-report" aria-label="Printable payroll report" aria-hidden="true">
+        <header className="print-report__header">
+          <div>
+            <p className="print-report__eyebrow">HR Payroll Calculator</p>
+            <h1>Payroll Report - {title}</h1>
+          </div>
+          <div className="print-report__meta">
+            <div>PH Preset: Malaysia + Johor</div>
+            <div>Calculation: One-time monthly payroll</div>
+          </div>
+        </header>
+
+        <section className="print-report__section">
+          <h2>Month Setup</h2>
+          <div className="print-report__details">
+            <PrintDetail label="Month" value={title} />
+            <PrintDetail label="Monthly Salary" value={formatMoney(settings.salary)} />
+            <PrintDetail label="Working Days" value={String(settings.workingDays)} />
+            <PrintDetail label="Default Shift" value={`${settings.defaultStart} - ${settings.defaultEnd}`} />
+            <PrintDetail label="Lunch Hours" value={formatHours(settings.lunchHours)} />
+            <PrintDetail label="Dinner Rule" value={`${settings.dinnerCutoff}, deduct ${formatHours(settings.dinnerDeductionHours)}`} />
+            <PrintDetail label="Allowance" value={formatMoney(settings.allowance)} />
+            <PrintDetail label="Previous OT" value={`${formatHours(settings.previousOtHours)} x ${settings.previousOtMultiplier}`} />
+          </div>
+        </section>
+
+        <section className="print-report__section">
+          <h2>Salary Summary</h2>
+          <div className="print-report__summary">
+            <PrintDetail label="Hourly Rate" value={formatMoney(totals.hourlyRate)} />
+            <PrintDetail label="Base Salary" value={formatMoney(totals.baseSalary)} />
+            <PrintDetail label="Weekday OT" value={`${formatHours(totals.weekdayOtHours)} / ${formatMoney(totals.weekdayOtAmount)}`} />
+            <PrintDetail label="Saturday OT" value={formatMoney(totals.saturdayOtAmount)} />
+            <PrintDetail label="Sunday OT" value={formatMoney(totals.sundayOtAmount)} />
+            <PrintDetail label="PH OT" value={formatMoney(totals.phOtAmount)} />
+            <PrintDetail label="PH + Weekend OT" value={formatMoney(totals.phWeekendOtAmount)} />
+            <PrintDetail label="Previous Unpaid OT" value={formatMoney(totals.previousOtAmount)} />
+            <PrintDetail label="Final Salary" value={formatMoney(totals.finalSalary)} strong />
+          </div>
+        </section>
+
+        <section className="print-report__section">
+          <h2>Timesheet</h2>
+          <table className="print-report__table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Day</th>
+                <th>Type</th>
+                <th>Clock In</th>
+                <th>Clock Out</th>
+                <th>Rate</th>
+                <th>OT</th>
+                <th>Amount</th>
+                <th>Remark</th>
+              </tr>
+            </thead>
+            <tbody>
+              {days.map((day) => {
+                const result = calculateDay(settings, day, totals.hourlyRate);
+                return (
+                  <tr key={day.date}>
+                    <td>{day.date}</td>
+                    <td>{day.weekday}</td>
+                    <td>{day.phName ? `${DAY_TYPE_LABELS[day.type]} - ${day.phName}` : DAY_TYPE_LABELS[day.type]}</td>
+                    <td>{day.clockIn || "-"}</td>
+                    <td>{day.clockOut || "-"}</td>
+                    <td>{day.multiplier}</td>
+                    <td>{formatHours(result.otHours)}</td>
+                    <td>{formatMoney(result.amount)}</td>
+                    <td>{day.remark || result.invalidReason || ""}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </section>
+      </section>
     </main>
   );
 }
@@ -387,6 +470,15 @@ function Summary({ label, value }: { label: string; value: string }) {
     <div className="border-b border-slate-200 py-2">
       <div className="text-xs text-slate-500">{label}</div>
       <div className="font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function PrintDetail({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className={strong ? "print-report__detail print-report__detail--strong" : "print-report__detail"}>
+      <span>{label}</span>
+      <strong>{value}</strong>
     </div>
   );
 }

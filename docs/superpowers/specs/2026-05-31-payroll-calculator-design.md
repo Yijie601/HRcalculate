@@ -166,6 +166,19 @@ final salary =
   + allowance
 ```
 
+### Printable Report
+
+The app should provide a `Print` action in the main header. The action opens the browser print dialog with `window.print()`.
+
+Print output should be a report layout, not the interactive calculator screen. It should include:
+
+- Report title with the selected month
+- Month setup summary
+- Salary summary with final salary
+- Full timesheet rows with date, weekday, day type, clock-in, clock-out, multiplier, OT, amount, and remark
+
+Interactive controls such as inputs, filters, reset buttons, and the print button should be hidden in print media. The print layout should be optimized for A4 portrait with compact table styling.
+
 ## Calculation Rules
 
 ### Workday OT
@@ -271,6 +284,7 @@ UI behavior tests:
 - PH rows load from Johor preset and remain editable.
 - Summary updates when settings or day rows change.
 - Invalid settings or times show inline errors.
+- Print action calls the browser print dialog and a print-ready report is rendered with summary and timesheet details.
 
 ## Out of Scope
 
