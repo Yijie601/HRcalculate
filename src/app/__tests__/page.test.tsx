@@ -17,8 +17,11 @@ describe("Payroll workbench", () => {
     const user = userEvent.setup();
     render(<Home />);
     const allowance = screen.getByLabelText("Allowance");
+    expect(allowance).toHaveValue(0);
+    expect(screen.getByLabelText("Previous OT Hours")).toHaveValue(0);
+    expect(screen.getByLabelText("Dinner Cutoff")).toHaveValue("21:00");
     await user.clear(allowance);
     await user.type(allowance, "200");
-    expect(screen.getByText("RM 2,475.00")).toBeInTheDocument();
+    expect(screen.getByText("RM 2,400.00")).toBeInTheDocument();
   });
 });

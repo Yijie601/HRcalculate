@@ -8,10 +8,10 @@ export const defaultSettings: PayrollSettings = {
   defaultStart: "08:30",
   defaultEnd: "17:30",
   lunchHours: 1,
-  dinnerCutoff: "20:00",
+  dinnerCutoff: "21:00",
   dinnerDeductionHours: 0.5,
-  allowance: 100,
-  previousOtHours: 4,
+  allowance: 0,
+  previousOtHours: 0,
   previousOtMultiplier: 1.5,
   state: "Johor",
 };

@@ -42,6 +42,24 @@ describe("payroll calculations", () => {
     });
   });
 
+  it("does not deduct dinner before the default 9pm cutoff", () => {
+    const day: DayEntry = {
+      date: "2026-05-17",
+      weekday: "Wednesday",
+      type: "workday",
+      clockIn: "08:30",
+      clockOut: "20:30",
+      multiplier: 1.5,
+      isEdited: true,
+    };
+    expect(defaultSettings.dinnerCutoff).toBe("21:00");
+    expect(calculateDay(defaultSettings, day, 12.5)).toMatchObject({
+      otHours: 3,
+      amount: 56.25,
+      dinnerDeducted: false,
+    });
+  });
+
   it("uses actual worked time for Sunday", () => {
     const day: DayEntry = {
       date: "2026-05-03",
@@ -75,10 +93,11 @@ describe("payroll calculations", () => {
     });
   });
 
-  it("adds allowance and previous unpaid OT to final salary", () => {
+  it("defaults allowance and previous unpaid OT to zero", () => {
     const totals = calculatePayroll(defaultSettings, []);
-    expect(totals.previousOtAmount).toBe(75);
-    expect(totals.allowance).toBe(100);
-    expect(totals.finalSalary).toBe(2375);
+    expect(defaultSettings.previousOtHours).toBe(0);
+    expect(totals.previousOtAmount).toBe(0);
+    expect(totals.allowance).toBe(0);
+    expect(totals.finalSalary).toBe(2200);
   });
 });

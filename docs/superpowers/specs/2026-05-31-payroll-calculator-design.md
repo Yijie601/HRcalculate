@@ -93,10 +93,10 @@ Fields:
 - Default clock-in time, default `08:30`
 - Default clock-out time, default `17:30`
 - Lunch duration, default `1h`
-- Dinner deduction cutoff time, default `20:00`
+- Dinner deduction cutoff time, default `21:00`
 - Dinner deduction duration, default `0.5h`
-- Allowance amount
-- Previous unpaid OT hours
+- Allowance amount, default `0`
+- Previous unpaid OT hours, default `0`
 - Previous unpaid OT multiplier, default `1.5x`
 
 ### Center Timesheet List
