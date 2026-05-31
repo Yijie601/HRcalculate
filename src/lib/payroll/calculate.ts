@@ -17,7 +17,11 @@ export const defaultSettings: PayrollSettings = {
 };
 
 export function normalDailyHours(settings: PayrollSettings): number {
-  return Math.max(differenceInHours(settings.defaultStart, settings.defaultEnd) - settings.lunchHours, 0);
+  try {
+    return Math.max(differenceInHours(settings.defaultStart, settings.defaultEnd) - settings.lunchHours, 0);
+  } catch {
+    return 0;
+  }
 }
 
 export function hourlyRate(settings: PayrollSettings): number {
@@ -49,8 +53,21 @@ export function calculateDay(settings: PayrollSettings, day: DayEntry, rate = ho
     };
   }
 
-  const clockInMinutes = parseTimeToMinutes(day.clockIn);
-  const clockOutMinutes = parseTimeToMinutes(day.clockOut);
+  let clockInMinutes: number;
+  let clockOutMinutes: number;
+  try {
+    clockInMinutes = parseTimeToMinutes(day.clockIn);
+    clockOutMinutes = parseTimeToMinutes(day.clockOut);
+  } catch (error) {
+    return {
+      date: day.date,
+      type: day.type,
+      otHours: 0,
+      amount: 0,
+      dinnerDeducted: false,
+      invalidReason: error instanceof Error ? error.message : "Use 24-hour time, e.g. 0830 or 17:30.",
+    };
+  }
   if (clockOutMinutes < clockInMinutes) {
     return {
       date: day.date,
@@ -66,12 +83,41 @@ export function calculateDay(settings: PayrollSettings, day: DayEntry, rate = ho
   if (isHolidayStyle(day.type)) {
     rawOt = (clockOutMinutes - clockInMinutes) / 60;
   } else {
-    const early = Math.max((parseTimeToMinutes(settings.defaultStart) - clockInMinutes) / 60, 0);
-    const after = Math.max((clockOutMinutes - parseTimeToMinutes(settings.defaultEnd)) / 60, 0);
+    let defaultStartMinutes: number;
+    let defaultEndMinutes: number;
+    try {
+      defaultStartMinutes = parseTimeToMinutes(settings.defaultStart);
+      defaultEndMinutes = parseTimeToMinutes(settings.defaultEnd);
+    } catch (error) {
+      return {
+        date: day.date,
+        type: day.type,
+        otHours: 0,
+        amount: 0,
+        dinnerDeducted: false,
+        invalidReason: error instanceof Error ? error.message : "Use 24-hour time, e.g. 0830 or 17:30.",
+      };
+    }
+    const early = Math.max((defaultStartMinutes - clockInMinutes) / 60, 0);
+    const after = Math.max((clockOutMinutes - defaultEndMinutes) / 60, 0);
     rawOt = early + after;
   }
 
-  const dinnerDeducted = clockOutMinutes >= parseTimeToMinutes(settings.dinnerCutoff) && rawOt > 0;
+  let dinnerCutoffMinutes: number;
+  try {
+    dinnerCutoffMinutes = parseTimeToMinutes(settings.dinnerCutoff);
+  } catch (error) {
+    return {
+      date: day.date,
+      type: day.type,
+      otHours: 0,
+      amount: 0,
+      dinnerDeducted: false,
+      invalidReason: error instanceof Error ? error.message : "Use 24-hour time, e.g. 0830 or 17:30.",
+    };
+  }
+
+  const dinnerDeducted = clockOutMinutes >= dinnerCutoffMinutes && rawOt > 0;
   if (dinnerDeducted) rawOt -= settings.dinnerDeductionHours;
 
   const otHours = Math.max(roundToNearestHalfHour(rawOt), 0);

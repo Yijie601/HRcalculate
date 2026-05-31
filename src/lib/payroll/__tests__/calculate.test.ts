@@ -25,6 +25,23 @@ describe("payroll calculations", () => {
     });
   });
 
+  it("returns an invalid reason instead of throwing for invalid text time", () => {
+    const day: DayEntry = {
+      date: "2026-05-06",
+      weekday: "Wednesday",
+      type: "workday",
+      clockIn: "2500",
+      clockOut: "18:30",
+      multiplier: 1.5,
+      isEdited: true,
+    };
+    expect(calculateDay(defaultSettings, day, 12.5)).toMatchObject({
+      otHours: 0,
+      amount: 0,
+      invalidReason: "Use 24-hour time, e.g. 0830 or 17:30.",
+    });
+  });
+
   it("deducts dinner when clock out reaches cutoff", () => {
     const day: DayEntry = {
       date: "2026-05-17",

@@ -24,4 +24,29 @@ describe("Payroll workbench", () => {
     await user.type(allowance, "200");
     expect(screen.getByText("RM 2,400.00")).toBeInTheDocument();
   });
+
+  it("uses text-based 24-hour time inputs and accepts compact time", async () => {
+    const user = userEvent.setup();
+    render(<Home />);
+    const defaultIn = screen.getByLabelText("Default In");
+    const clockIn = screen.getByLabelText("2026-05-06 clock in");
+    const clockOut = screen.getByLabelText("2026-05-06 clock out");
+
+    expect(defaultIn).toHaveAttribute("type", "text");
+    expect(defaultIn).toHaveAttribute("inputmode", "numeric");
+    expect(clockIn).toHaveAttribute("type", "text");
+
+    await user.clear(clockIn);
+    await user.type(clockIn, "0730");
+    await user.tab();
+    expect(clockIn).toHaveValue("07:30");
+
+    await user.clear(clockOut);
+    await user.type(clockOut, "1830");
+    await user.tab();
+
+    expect(clockOut).toHaveValue("18:30");
+    expect(screen.getByText("2.0h / RM 37.50")).toBeInTheDocument();
+    expect(screen.getByText("RM 2,237.50")).toBeInTheDocument();
+  });
 });

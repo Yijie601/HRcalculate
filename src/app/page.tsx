@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { calculateDay, calculatePayroll, defaultSettings } from "@/lib/payroll/calculate";
 import { formatHours, formatMoney } from "@/lib/payroll/format";
 import { generateMonthEntries } from "@/lib/payroll/generate";
+import { normalizeTimeInput } from "@/lib/payroll/time";
 import type { DayEntry, DayType, PayrollSettings } from "@/lib/payroll/types";
 
 const DAY_TYPE_LABELS: Record<DayType, string> = {
@@ -19,6 +20,11 @@ const DAY_TYPE_LABELS: Record<DayType, string> = {
 function numberValue(value: string): number {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizedTimeValue(value: string): string {
+  const normalized = normalizeTimeInput(value);
+  return normalized.value ?? value;
 }
 
 function monthTitle(month: string): string {
@@ -141,11 +147,27 @@ export default function Home() {
               <div className="grid grid-cols-2 gap-2">
                 <label className="block text-sm">
                   <span className="mb-1 block text-slate-600">Default In</span>
-                  <input className="field-input" type="time" value={settings.defaultStart} onChange={(event) => updateDefaultTime("defaultStart", event.target.value)} />
+                  <input
+                    className="field-input"
+                    inputMode="numeric"
+                    placeholder="0830"
+                    type="text"
+                    value={settings.defaultStart}
+                    onBlur={(event) => updateDefaultTime("defaultStart", normalizedTimeValue(event.target.value))}
+                    onChange={(event) => updateDefaultTime("defaultStart", event.target.value)}
+                  />
                 </label>
                 <label className="block text-sm">
                   <span className="mb-1 block text-slate-600">Default Out</span>
-                  <input className="field-input" type="time" value={settings.defaultEnd} onChange={(event) => updateDefaultTime("defaultEnd", event.target.value)} />
+                  <input
+                    className="field-input"
+                    inputMode="numeric"
+                    placeholder="1730"
+                    type="text"
+                    value={settings.defaultEnd}
+                    onBlur={(event) => updateDefaultTime("defaultEnd", normalizedTimeValue(event.target.value))}
+                    onChange={(event) => updateDefaultTime("defaultEnd", event.target.value)}
+                  />
                 </label>
               </div>
 
@@ -156,7 +178,15 @@ export default function Home() {
                 </label>
                 <label className="block text-sm">
                   <span className="mb-1 block text-slate-600">Dinner Cutoff</span>
-                  <input className="field-input" type="time" value={settings.dinnerCutoff} onChange={(event) => updateSettings("dinnerCutoff", event.target.value)} />
+                  <input
+                    className="field-input"
+                    inputMode="numeric"
+                    placeholder="2100"
+                    type="text"
+                    value={settings.dinnerCutoff}
+                    onBlur={(event) => updateSettings("dinnerCutoff", normalizedTimeValue(event.target.value))}
+                    onChange={(event) => updateSettings("dinnerCutoff", event.target.value)}
+                  />
                 </label>
               </div>
 
@@ -239,10 +269,28 @@ export default function Home() {
                           {day.phName ? <div className="mt-1 max-w-40 truncate text-xs text-slate-500">{day.phName}</div> : null}
                         </td>
                         <td className="border-t border-slate-200 p-2">
-                          <input aria-label={`${day.date} clock in`} className="table-input w-28" type="time" value={day.clockIn ?? ""} onChange={(event) => updateDay(day.date, { clockIn: event.target.value })} />
+                          <input
+                            aria-label={`${day.date} clock in`}
+                            className="table-input w-28"
+                            inputMode="numeric"
+                            placeholder="0830"
+                            type="text"
+                            value={day.clockIn ?? ""}
+                            onBlur={(event) => updateDay(day.date, { clockIn: normalizedTimeValue(event.target.value) })}
+                            onChange={(event) => updateDay(day.date, { clockIn: event.target.value })}
+                          />
                         </td>
                         <td className="border-t border-slate-200 p-2">
-                          <input aria-label={`${day.date} clock out`} className="table-input w-28" type="time" value={day.clockOut ?? ""} onChange={(event) => updateDay(day.date, { clockOut: event.target.value })} />
+                          <input
+                            aria-label={`${day.date} clock out`}
+                            className="table-input w-28"
+                            inputMode="numeric"
+                            placeholder="1730"
+                            type="text"
+                            value={day.clockOut ?? ""}
+                            onBlur={(event) => updateDay(day.date, { clockOut: normalizedTimeValue(event.target.value) })}
+                            onChange={(event) => updateDay(day.date, { clockOut: event.target.value })}
+                          />
                         </td>
                         <td className="border-t border-slate-200 p-2">
                           <input aria-label={`${day.date} multiplier`} className="table-input w-20" type="number" min="0" step="0.5" value={day.multiplier} onChange={(event) => updateDay(day.date, { multiplier: numberValue(event.target.value) })} />

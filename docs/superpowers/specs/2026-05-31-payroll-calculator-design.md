@@ -99,6 +99,8 @@ Fields:
 - Previous unpaid OT hours, default `0`
 - Previous unpaid OT multiplier, default `1.5x`
 
+Time fields should use 24-hour text input instead of native browser time pickers. Users can type either `HH:mm` or compact values such as `830`, `0830`, `1730`, or `2100`; the UI normalizes valid compact values to `HH:mm`.
+
 ### Center Timesheet List
 
 Generate one row per day in the selected month. Each row should show:
