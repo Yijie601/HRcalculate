@@ -101,6 +101,8 @@ Fields:
 
 Time fields should use 24-hour text input instead of native browser time pickers. Users can type either `HH:mm` or compact values such as `830`, `0830`, `1730`, or `2100`; the UI normalizes valid compact values to `HH:mm`.
 
+Within the timesheet rows, pressing `Enter` in a clock-in or clock-out field should normalize the current value and move focus to the next row in the same column. Pressing `Shift+Enter` should move focus to the previous row in the same column.
+
 ### Center Timesheet List
 
 Generate one row per day in the selected month. Each row should show:

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { describe, expect, it } from "vitest";
@@ -48,5 +48,20 @@ describe("Payroll workbench", () => {
     expect(clockOut).toHaveValue("18:30");
     expect(screen.getByText("2.0h / RM 37.50")).toBeInTheDocument();
     expect(screen.getByText("RM 2,237.50")).toBeInTheDocument();
+  });
+
+  it("moves to the next row in the same time column when Enter is pressed", async () => {
+    const user = userEvent.setup();
+    render(<Home />);
+    const currentClockIn = screen.getByLabelText("2026-05-06 clock in");
+    const nextClockIn = screen.getByLabelText("2026-05-07 clock in");
+
+    await user.clear(currentClockIn);
+    await user.type(currentClockIn, "0730{Enter}");
+
+    await waitFor(() => {
+      expect(currentClockIn).toHaveValue("07:30");
+      expect(nextClockIn).toHaveFocus();
+    });
   });
 });

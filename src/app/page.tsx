@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarDays, Clock, DollarSign, Filter, ListRestart } from "lucide-react";
-import { useMemo, useState } from "react";
+import { type KeyboardEvent, useMemo, useState } from "react";
 import { calculateDay, calculatePayroll, defaultSettings } from "@/lib/payroll/calculate";
 import { formatHours, formatMoney } from "@/lib/payroll/format";
 import { generateMonthEntries } from "@/lib/payroll/generate";
@@ -16,6 +16,8 @@ const DAY_TYPE_LABELS: Record<DayType, string> = {
   ph_weekend: "PH + Weekend",
   custom: "Custom",
 };
+
+type TimeField = "clockIn" | "clockOut";
 
 function numberValue(value: string): number {
   const parsed = Number(value);
@@ -99,6 +101,23 @@ export default function Home() {
     const freshDay = buildInitialDays(settings).find((day) => day.date === date);
     if (!freshDay) return;
     setDays((current) => current.map((day) => (day.date === date ? freshDay : day)));
+  }
+
+  function handleTimeKeyDown(event: KeyboardEvent<HTMLInputElement>, date: string, field: TimeField) {
+    if (event.key !== "Enter") return;
+
+    event.preventDefault();
+    updateDay(date, { [field]: normalizedTimeValue(event.currentTarget.value) });
+
+    const currentIndex = visibleDays.findIndex((day) => day.date === date);
+    const target = visibleDays[currentIndex + (event.shiftKey ? -1 : 1)];
+    if (!target) return;
+
+    window.setTimeout(() => {
+      const nextInput = document.querySelector<HTMLInputElement>(`input[data-time-date="${target.date}"][data-time-field="${field}"]`);
+      nextInput?.focus();
+      nextInput?.select();
+    }, 0);
   }
 
   return (
@@ -274,10 +293,13 @@ export default function Home() {
                             className="table-input w-28"
                             inputMode="numeric"
                             placeholder="0830"
+                            data-time-date={day.date}
+                            data-time-field="clockIn"
                             type="text"
                             value={day.clockIn ?? ""}
                             onBlur={(event) => updateDay(day.date, { clockIn: normalizedTimeValue(event.target.value) })}
                             onChange={(event) => updateDay(day.date, { clockIn: event.target.value })}
+                            onKeyDown={(event) => handleTimeKeyDown(event, day.date, "clockIn")}
                           />
                         </td>
                         <td className="border-t border-slate-200 p-2">
@@ -286,10 +308,13 @@ export default function Home() {
                             className="table-input w-28"
                             inputMode="numeric"
                             placeholder="1730"
+                            data-time-date={day.date}
+                            data-time-field="clockOut"
                             type="text"
                             value={day.clockOut ?? ""}
                             onBlur={(event) => updateDay(day.date, { clockOut: normalizedTimeValue(event.target.value) })}
                             onChange={(event) => updateDay(day.date, { clockOut: event.target.value })}
+                            onKeyDown={(event) => handleTimeKeyDown(event, day.date, "clockOut")}
                           />
                         </td>
                         <td className="border-t border-slate-200 p-2">
