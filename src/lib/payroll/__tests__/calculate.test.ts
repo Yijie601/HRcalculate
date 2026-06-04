@@ -77,7 +77,7 @@ describe("payroll calculations", () => {
     });
   });
 
-  it("uses actual worked time for Sunday", () => {
+  it("deducts lunch from weekend OT when actual worked time reaches 4 hours", () => {
     const day: DayEntry = {
       date: "2026-05-03",
       weekday: "Sunday",
@@ -88,8 +88,24 @@ describe("payroll calculations", () => {
       isEdited: true,
     };
     expect(calculateDay(defaultSettings, day, 12.5)).toMatchObject({
-      otHours: 6,
-      amount: 150,
+      otHours: 5,
+      amount: 125,
+    });
+  });
+
+  it("does not deduct lunch from weekend OT when actual worked time is less than 4 hours", () => {
+    const day: DayEntry = {
+      date: "2026-05-03",
+      weekday: "Sunday",
+      type: "sunday",
+      clockIn: "10:00",
+      clockOut: "13:30",
+      multiplier: 2,
+      isEdited: true,
+    };
+    expect(calculateDay(defaultSettings, day, 12.5)).toMatchObject({
+      otHours: 3.5,
+      amount: 87.5,
     });
   });
 
@@ -105,8 +121,8 @@ describe("payroll calculations", () => {
       isEdited: true,
     };
     expect(calculateDay(defaultSettings, day, 12.5)).toMatchObject({
-      otHours: 5,
-      amount: 187.5,
+      otHours: 4,
+      amount: 150,
     });
   });
 

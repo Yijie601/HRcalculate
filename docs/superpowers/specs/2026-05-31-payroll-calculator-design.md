@@ -200,8 +200,11 @@ Then round to nearest `0.5h` and multiply by the row multiplier.
 For Saturday, Sunday, PH, and PH + weekend:
 
 ```text
-raw OT = actual clock out - actual clock in
+actual worked hours = actual clock out - actual clock in
+raw OT = actual worked hours
 ```
+
+If `actual worked hours >= 4h`, subtract lunch hours from raw OT. If actual worked hours is less than `4h`, do not subtract lunch. The same editable `Lunch Hours` setting is used for weekday normal hours and for weekend/PH meal deduction.
 
 If `actual clock out >= dinner cutoff`, subtract dinner deduction from raw OT.
 
@@ -270,6 +273,7 @@ Core calculation tests:
 - Hourly rate uses `salary / working days / normal daily hours`.
 - Workday OT includes early and after-work OT.
 - Weekend and PH use actual worked duration.
+- Weekend and PH deduct lunch hours only when actual worked duration reaches `4h`.
 - Saturday, Sunday, PH, and PH + weekend multipliers apply correctly.
 - Dinner deduction applies when clock-out reaches the cutoff.
 - OT rounds to nearest `0.5h`.

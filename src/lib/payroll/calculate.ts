@@ -38,6 +38,11 @@ function isHolidayStyle(type: DayEntry["type"]): boolean {
   return type === "saturday" || type === "sunday" || type === "ph" || type === "ph_weekend";
 }
 
+function applyWeekendLunchDeduction(workedHours: number, lunchHours: number): number {
+  if (workedHours < 4) return workedHours;
+  return workedHours - lunchHours;
+}
+
 function roundMoney(value: number): number {
   return Math.round(value * 100) / 100;
 }
@@ -81,7 +86,8 @@ export function calculateDay(settings: PayrollSettings, day: DayEntry, rate = ho
 
   let rawOt: number;
   if (isHolidayStyle(day.type)) {
-    rawOt = (clockOutMinutes - clockInMinutes) / 60;
+    const workedHours = (clockOutMinutes - clockInMinutes) / 60;
+    rawOt = applyWeekendLunchDeduction(workedHours, settings.lunchHours);
   } else {
     let defaultStartMinutes: number;
     let defaultEndMinutes: number;
